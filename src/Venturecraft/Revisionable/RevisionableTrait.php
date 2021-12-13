@@ -89,20 +89,37 @@ trait RevisionableTrait
     }
 
     /**
+     * @param $revisionId
+     * @return mixed|null
+     */
+    public function getRevisionById($revisionId)
+    {
+        $revisions = $this->revisionHistoryMapped($revisionId);
+
+        return isset($revisions[$revisionId]) ? $revisions[$revisionId] : null;
+    }
+
+    /**
      * @return mixed
      */
-    public function revisionHistoryMapped()
+    public function revisionHistoryMapped($revisionId)
     {
         $out = [];
-        $data = $this->revisionHistory()->get()->sortByDesc(function ($item) {
+        $queryBuilder = $this->revisionHistory();
+
+        if ($revisionId > 0) {
+            $queryBuilder = $queryBuilder->where('revision_id', $revisionId);
+        }
+
+        $data = $queryBuilder->get()->sortByDesc(function ($item) {
             return $item->created_at;
         });
         foreach ($data as $key => $item) {
             $out[$item->revision_id]['item'] = $item;
             $out[$item->revision_id]['revision_data'][] = [
                 'key' => $item->key,
-                'old_value' => $item->oldValue(),
-                'new_value' => $item->newValue()
+                'old' => $item->oldValue(),
+                'new' => $item->newValue()
             ];
         }
 
@@ -367,6 +384,9 @@ trait RevisionableTrait
     }
 
 
+    /**
+     * @return array
+     */
     public function getAdditionalFields()
     {
         $additional = [];
