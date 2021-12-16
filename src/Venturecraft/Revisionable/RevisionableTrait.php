@@ -102,7 +102,7 @@ trait RevisionableTrait
     /**
      * @return mixed
      */
-    public function revisionHistoryMapped($revisionId)
+    public function revisionHistoryMapped($revisionId = -1)
     {
         $out = [];
         $queryBuilder = $this->revisionHistory();
